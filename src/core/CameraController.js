@@ -11,15 +11,18 @@ export class CameraController {
     this.pitch = 0;
     this.yaw = 0;
     this.keys = {};
+    this.bounds = { minX: -9.25, maxX: 9.25, minZ: -9.25, maxZ: 8.6 };
+    this.colliders = [];
   }
 
-  init() {
+  init(options = {}) {
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-    this.camera.position.set(0, 1.6, 2);
-    this.camera.lookAt(0, 1.3, -5);
+    if (options.bounds) this.bounds = options.bounds;
+    if (options.colliders) this.colliders = options.colliders;
+    this.setPose(options.spawn || { position_x: 0, position_y: 1.6, position_z: 2, rotation_yaw: 0, rotation_pitch: 0 });
 
     // Pointer lock for mouse look
-    document.addEventListener('click', () => {
+    document.getElementById('game-container').addEventListener('click', () => {
       document.body.requestPointerLock();
     });
 
@@ -66,7 +69,51 @@ export class CameraController {
     if (this.direction.length() > 0) {
       this.direction.normalize();
       this.direction.applyEuler(new THREE.Euler(0, this.yaw, 0));
-      this.camera.position.addScaledVector(this.direction, this.moveSpeed * deltaTime);
+      const nextPosition = this.camera.position.clone().addScaledVector(this.direction, this.moveSpeed * deltaTime);
+      this.camera.position.copy(this.resolveCollision(nextPosition));
     }
+  }
+
+  resolveCollision(position) {
+    const radius = 0.32;
+    position.x = Math.max(this.bounds.minX, Math.min(this.bounds.maxX, position.x));
+    position.z = Math.max(this.bounds.minZ, Math.min(this.bounds.maxZ, position.z));
+
+    this.colliders.forEach(collider => {
+      const minX = collider.minX - radius;
+      const maxX = collider.maxX + radius;
+      const minZ = collider.minZ - radius;
+      const maxZ = collider.maxZ + radius;
+      if (position.x < minX || position.x > maxX || position.z < minZ || position.z > maxZ) return;
+
+      const pushLeft = Math.abs(position.x - minX);
+      const pushRight = Math.abs(maxX - position.x);
+      const pushBack = Math.abs(position.z - minZ);
+      const pushFront = Math.abs(maxZ - position.z);
+      const smallest = Math.min(pushLeft, pushRight, pushBack, pushFront);
+
+      if (smallest === pushLeft) position.x = minX;
+      else if (smallest === pushRight) position.x = maxX;
+      else if (smallest === pushBack) position.z = minZ;
+      else position.z = maxZ;
+    });
+
+    position.y = 1.6;
+    return position;
+  }
+
+  setPose(state) {
+    this.camera.position.set(state.position_x, state.position_y, state.position_z);
+    this.camera.position.copy(this.resolveCollision(this.camera.position));
+    this.yaw = state.rotation_yaw || 0;
+    this.pitch = state.rotation_pitch || 0;
+  }
+
+  getPose() {
+    return {
+      position: this.camera.position.clone(),
+      yaw: this.yaw,
+      pitch: this.pitch
+    };
   }
 }

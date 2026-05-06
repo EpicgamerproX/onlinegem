@@ -12,6 +12,7 @@
       overflow: hidden;
       background: #000;
       font-family: Arial, sans-serif;
+      color: #e8f2ec;
     }
     #game-container {
       width: 100vw;
@@ -30,6 +31,101 @@
       border-radius: 5px;
       font-size: 14px;
       max-width: 300px;
+      pointer-events: none;
+    }
+    #auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      background:
+        linear-gradient(rgba(3, 6, 6, 0.72), rgba(3, 6, 6, 0.86)),
+        radial-gradient(circle at 50% 35%, rgba(116, 255, 216, 0.15), transparent 32%);
+    }
+    #auth-overlay.is-visible {
+      display: grid;
+    }
+    #auth-panel {
+      width: min(380px, calc(100vw - 32px));
+      padding: 24px;
+      background: rgba(8, 12, 12, 0.94);
+      border: 1px solid rgba(216, 255, 244, 0.18);
+      border-radius: 8px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    }
+    #auth-panel h1 {
+      margin: 6px 0 18px;
+      font-size: 28px;
+      line-height: 1.05;
+    }
+    .auth-kicker {
+      color: #74ffd8;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .auth-tabs button,
+    .auth-submit {
+      min-height: 40px;
+      border: 1px solid rgba(216, 255, 244, 0.18);
+      border-radius: 6px;
+      color: #e8f2ec;
+      background: #101818;
+      cursor: pointer;
+    }
+    .auth-tabs button.active,
+    .auth-submit {
+      color: #06100e;
+      background: #74ffd8;
+      border-color: #74ffd8;
+    }
+    #auth-panel label {
+      display: grid;
+      gap: 6px;
+      margin: 12px 0;
+      font-size: 13px;
+      color: #b8c8c1;
+    }
+    #auth-panel input {
+      min-height: 40px;
+      padding: 0 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(216, 255, 244, 0.18);
+      background: #050808;
+      color: #e8f2ec;
+    }
+    .profile-fields {
+      display: none;
+    }
+    #auth-overlay.needs-profile .profile-fields {
+      display: block;
+    }
+    #auth-overlay.profile-only .auth-tabs,
+    #auth-overlay.profile-only label:has(input[name="email"]),
+    #auth-overlay.profile-only label:has(input[name="password"]) {
+      display: none;
+    }
+    .auth-submit {
+      width: 100%;
+      margin-top: 8px;
+      font-weight: 700;
+    }
+    .auth-submit:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+    .auth-status {
+      min-height: 20px;
+      margin: 12px 0 0;
+      color: #ffb8a6;
+      font-size: 13px;
     }
   </style>
 </head>

@@ -4,6 +4,8 @@ export class OfficeMap {
   constructor() {
     this.scene = null;
     this.materials = {};
+    this.bounds = { minX: -9.25, maxX: 9.25, minZ: -9.25, maxZ: 8.6 };
+    this.colliders = [];
   }
 
   init(scene) {
@@ -14,6 +16,7 @@ export class OfficeMap {
     this.createCubicles();
     this.createDesk();
     this.createOfficeProps();
+    this.createLandmarks();
   }
 
   createMaterials() {
@@ -106,6 +109,7 @@ export class OfficeMap {
       wall.castShadow = true;
       wall.receiveShadow = true;
       this.scene.add(wall);
+      this.addCollider(x - 0.06, x + 0.06, wall.position.z - 1.55, wall.position.z + 1.55);
     });
 
     [-3, 0, 3].forEach(x => {
@@ -114,6 +118,7 @@ export class OfficeMap {
       divider.castShadow = true;
       divider.receiveShadow = true;
       this.scene.add(divider);
+      this.addCollider(x - 1.6, x + 1.6, -3.16, -3.04);
     });
   }
 
@@ -126,6 +131,7 @@ export class OfficeMap {
     deskTop.castShadow = true;
     deskTop.receiveShadow = true;
     this.scene.add(deskTop);
+    this.addCollider(-1.1, 1.1, 4.25, 5.35);
 
     // Desk legs
     const legGeometry = new THREE.BoxGeometry(0.1, 0.7, 0.1);
@@ -193,6 +199,7 @@ export class OfficeMap {
     cabinet.castShadow = true;
     cabinet.receiveShadow = true;
     this.scene.add(cabinet);
+    this.addCollider(x - 0.62, x + 0.62, z - 0.42, z + 0.42);
 
     for (let i = 0; i < 3; i++) {
       const handle = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.035, 0.04), this.materials.darkPlastic);
@@ -227,5 +234,85 @@ export class OfficeMap {
       panel.receiveShadow = true;
       this.scene.add(panel);
     }
+  }
+
+  createLandmarks() {
+    this.createServerRack(-8.4, 1.1, 1.9);
+    this.createWarningLight(-7.7, 2.85, -9.88);
+    this.createWhiteboard(-5.4, 2.15, -9.92);
+    this.createLooseChairs();
+  }
+
+  createServerRack(x, y, z) {
+    const rackMaterial = new THREE.MeshStandardMaterial({ color: 0x15191a, roughness: 0.48, metalness: 0.35 });
+    const rack = new THREE.Mesh(new THREE.BoxGeometry(1, 2.2, 0.75), rackMaterial);
+    rack.position.set(x, y, z);
+    rack.castShadow = true;
+    rack.receiveShadow = true;
+    this.scene.add(rack);
+    this.addCollider(x - 0.55, x + 0.55, z - 0.42, z + 0.42);
+
+    for (let i = 0; i < 6; i++) {
+      const led = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.02), new THREE.MeshBasicMaterial({
+        color: i % 3 === 0 ? 0xff3847 : 0x74ffd8
+      }));
+      led.position.set(x + 0.34, 0.35 + i * 0.28, z - 0.39);
+      this.scene.add(led);
+    }
+  }
+
+  createWarningLight(x, y, z) {
+    const light = new THREE.PointLight(0xff2438, 0.6, 4, 2);
+    light.position.set(x, y, z + 0.25);
+    this.scene.add(light);
+
+    const casing = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff2438 }));
+    casing.position.copy(light.position);
+    this.scene.add(casing);
+  }
+
+  createWhiteboard(x, y, z) {
+    const board = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.1, 0.04), new THREE.MeshStandardMaterial({
+      color: 0xb7c0b8,
+      roughness: 0.42,
+      metalness: 0.08
+    }));
+    board.position.set(x, y, z);
+    this.scene.add(board);
+  }
+
+  createLooseChairs() {
+    [
+      [-2.4, 0.45, 3.6, 0.3],
+      [2.35, 0.45, 2.15, -0.45],
+      [6.7, 0.45, -1.25, 0.8]
+    ].forEach(([x, y, z, rotation]) => {
+      const chair = new THREE.Group();
+      const material = new THREE.MeshStandardMaterial({ color: 0x202829, roughness: 0.7 });
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.08, 0.55), material);
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 0.08), material);
+      back.position.set(0, 0.38, 0.28);
+      chair.add(seat, back);
+      chair.position.set(x, y, z);
+      chair.rotation.y = rotation;
+      chair.traverse(child => {
+        child.castShadow = true;
+        child.receiveShadow = true;
+      });
+      this.scene.add(chair);
+      this.addCollider(x - 0.38, x + 0.38, z - 0.38, z + 0.38);
+    });
+  }
+
+  addCollider(minX, maxX, minZ, maxZ) {
+    this.colliders.push({ minX, maxX, minZ, maxZ });
+  }
+
+  getNavigationBounds() {
+    return this.bounds;
+  }
+
+  getCollisionBoxes() {
+    return this.colliders;
   }
 }

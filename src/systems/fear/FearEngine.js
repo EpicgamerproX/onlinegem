@@ -48,4 +48,8 @@ export class FearEngine {
   getFearLevel() {
     return this.fearLevel / this.maxFearLevel;
   }
+
+  setFearLevel(fearRatio) {
+    this.fearLevel = Math.max(0, Math.min(1, fearRatio || 0)) * this.maxFearLevel;
+  }
 }
