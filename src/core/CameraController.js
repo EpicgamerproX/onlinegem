@@ -15,8 +15,8 @@ export class CameraController {
 
   init() {
     this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-    this.camera.position.set(0, 1.6, 2); // Position inside room, looking towards the debug box
-    this.camera.lookAt(0, 0.5, -5); // Look at the green debug box
+    this.camera.position.set(0, 1.6, 2);
+    this.camera.lookAt(0, 1.3, -5);
 
     // Pointer lock for mouse look
     document.addEventListener('click', () => {

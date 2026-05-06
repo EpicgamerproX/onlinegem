@@ -8,6 +8,7 @@ export class FearEngine {
     this.fearEffects = new FearEffects();
     this.fearLevel = 0;
     this.maxFearLevel = 100;
+    this.jumpScareTriggered = false;
   }
 
   init(scene, camera) {
@@ -34,11 +35,13 @@ export class FearEngine {
     this.fearLevel = Math.min(this.maxFearLevel, this.fearLevel);
 
     // Apply effects
-    this.fearEffects.update(this.fearLevel / this.maxFearLevel);
+    const fearRatio = this.fearLevel / this.maxFearLevel;
+    this.fearEffects.update(fearRatio, deltaTime);
 
     // Check for overload
-    if (this.fearLevel >= this.maxFearLevel) {
-      console.log('Fear overload - Game Over');
+    if (!this.jumpScareTriggered && (this.fearLevel >= this.maxFearLevel || entityDistance <= 2.45)) {
+      this.jumpScareTriggered = true;
+      this.fearEffects.triggerJumpScare();
     }
   }
 

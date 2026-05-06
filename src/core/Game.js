@@ -62,6 +62,9 @@ export class Game {
     // Update fear system
     this.fearEngine.update(this.micAnalyzer.getNoiseLevel(), this.entityController.getEntityDistance(), deltaTime);
 
+    // Update environmental ambience
+    this.sceneManager.update(deltaTime);
+
     // Update camera
     this.cameraController.update(deltaTime);
   }

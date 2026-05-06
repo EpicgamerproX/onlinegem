@@ -11,12 +11,17 @@ export class SceneManager {
 
   init() {
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.Fog(0x000000, 10, 50); // Add fog for atmosphere
+    this.scene.background = new THREE.Color(0x050707);
+    this.scene.fog = new THREE.FogExp2(0x050707, 0.055);
 
     // Initialize map
     this.officeMap.init(this.scene);
 
     // Initialize lighting
     this.lightingSystem.init(this.scene);
+  }
+
+  update(deltaTime) {
+    this.lightingSystem.update(deltaTime);
   }
 }
