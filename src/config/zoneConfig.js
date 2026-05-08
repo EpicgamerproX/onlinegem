@@ -2,7 +2,7 @@ export const zoneDefinitions = [
   {
     id: 'lobby',
     name: 'Elevator Lobby',
-    bounds: { minX: -6, maxX: 6, minZ: 15, maxZ: 24 },
+    bounds: { minX: -7, maxX: 7, minZ: 12, maxZ: 28 },
     pressure: 0.65,
     lightingGroup: 'lobby',
     ambientProfile: 'distant_elevator',
@@ -12,7 +12,7 @@ export const zoneDefinitions = [
   {
     id: 'cubicles',
     name: 'Cubicle Maze',
-    bounds: { minX: -10, maxX: 10, minZ: -7, maxZ: 8 },
+    bounds: { minX: -11, maxX: 11, minZ: -11, maxZ: 11 },
     pressure: 0.95,
     lightingGroup: 'cubicles',
     ambientProfile: 'fluorescent_buzz',
@@ -22,7 +22,7 @@ export const zoneDefinitions = [
   {
     id: 'executive',
     name: 'Executive Offices',
-    bounds: { minX: 11, maxX: 27, minZ: -8, maxZ: 9 },
+    bounds: { minX: 12, maxX: 35, minZ: -8, maxZ: 10 },
     pressure: 0.75,
     lightingGroup: 'executive',
     ambientProfile: 'glass_creak',
@@ -32,7 +32,7 @@ export const zoneDefinitions = [
   {
     id: 'conference',
     name: 'Conference Wing',
-    bounds: { minX: 10, maxX: 27, minZ: 10, maxZ: 23 },
+    bounds: { minX: 12, maxX: 35, minZ: 11, maxZ: 28 },
     pressure: 0.9,
     lightingGroup: 'conference',
     ambientProfile: 'speaker_static',
@@ -42,7 +42,7 @@ export const zoneDefinitions = [
   {
     id: 'cafeteria',
     name: 'Cafeteria',
-    bounds: { minX: -27, maxX: -11, minZ: 8, maxZ: 23 },
+    bounds: { minX: -35, maxX: -12, minZ: 9, maxZ: 28 },
     pressure: 0.72,
     lightingGroup: 'cafeteria',
     ambientProfile: 'vending_hum',
@@ -52,7 +52,7 @@ export const zoneDefinitions = [
   {
     id: 'archive',
     name: 'Archive Room',
-    bounds: { minX: -27, maxX: -11, minZ: -8, maxZ: 7 },
+    bounds: { minX: -35, maxX: -12, minZ: -9, maxZ: 8 },
     pressure: 1.25,
     lightingGroup: 'archive',
     ambientProfile: 'paper_shift',
@@ -62,7 +62,7 @@ export const zoneDefinitions = [
   {
     id: 'server',
     name: 'Server Room',
-    bounds: { minX: -27, maxX: -11, minZ: -25, maxZ: -9 },
+    bounds: { minX: -35, maxX: -12, minZ: -34, maxZ: -10 },
     pressure: 1.45,
     lightingGroup: 'server',
     ambientProfile: 'server_fans',
@@ -72,7 +72,7 @@ export const zoneDefinitions = [
   {
     id: 'maintenance',
     name: 'Maintenance Corridor',
-    bounds: { minX: -10, maxX: 10, minZ: -25, maxZ: -15 },
+    bounds: { minX: -11, maxX: 11, minZ: -34, maxZ: -16 },
     pressure: 1.35,
     lightingGroup: 'maintenance',
     ambientProfile: 'pipe_knock',
@@ -82,7 +82,7 @@ export const zoneDefinitions = [
   {
     id: 'security',
     name: 'Security Room',
-    bounds: { minX: 11, maxX: 27, minZ: -25, maxZ: -14 },
+    bounds: { minX: 12, maxX: 24, minZ: -34, maxZ: -24 },
     pressure: 0.85,
     lightingGroup: 'security',
     ambientProfile: 'camera_relay',
@@ -92,7 +92,7 @@ export const zoneDefinitions = [
   {
     id: 'basement',
     name: 'Parking Basement',
-    bounds: { minX: 11, maxX: 27, minZ: -13, maxZ: -9 },
+    bounds: { minX: 12, maxX: 35, minZ: -23, maxZ: -10 },
     pressure: 1.5,
     lightingGroup: 'basement',
     ambientProfile: 'concrete_echo',
