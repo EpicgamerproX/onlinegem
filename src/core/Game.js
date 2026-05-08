@@ -72,7 +72,9 @@ export class Game {
     this.audioEngine.init();
     this.playerSync.init(this.sceneManager.scene);
     this.interactionSystem.init({
-      interactables: this.sceneManager.officeMap.getInteractables()
+      interactables: this.sceneManager.officeMap.getInteractables(),
+      camera: this.cameraController.camera,
+      scene: this.sceneManager.scene
     });
     this.missionSystem.init({
       interactables: this.sceneManager.officeMap.getInteractables()
@@ -98,6 +100,7 @@ export class Game {
     this.interactionSystem.update(this.cameraController.camera, deltaTime, {
       zoneContext: this.zoneContext
     });
+    this.cameraController.setLoadPenalty(this.interactionSystem.getCarryPenalty());
     this.consumeInteractionEvents();
 
     this.missionSystem.update(deltaTime);

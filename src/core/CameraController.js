@@ -8,6 +8,7 @@ export class CameraController {
     this.direction = new THREE.Vector3();
     this.moveSpeed = 5;
     this.lookSpeed = 0.002;
+    this.loadPenalty = 0;
     this.pitch = 0;
     this.yaw = 0;
     this.keys = {};
@@ -69,7 +70,8 @@ export class CameraController {
     if (this.direction.length() > 0) {
       this.direction.normalize();
       this.direction.applyEuler(new THREE.Euler(0, this.yaw, 0));
-      const nextPosition = this.camera.position.clone().addScaledVector(this.direction, this.moveSpeed * deltaTime);
+      const speed = this.moveSpeed * Math.max(0.32, 1 - this.loadPenalty);
+      const nextPosition = this.camera.position.clone().addScaledVector(this.direction, speed * deltaTime);
       this.camera.position.copy(this.resolveCollision(nextPosition));
     }
   }
@@ -107,6 +109,10 @@ export class CameraController {
     this.camera.position.copy(this.resolveCollision(this.camera.position));
     this.yaw = state.rotation_yaw || 0;
     this.pitch = state.rotation_pitch || 0;
+  }
+
+  setLoadPenalty(value) {
+    this.loadPenalty = Math.max(0, Math.min(0.55, value));
   }
 
   getPose() {

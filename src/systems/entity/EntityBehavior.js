@@ -60,17 +60,25 @@ export class EntityBehavior {
       const pos = event.position || fallbackPosition;
       this.lastHeardPosition.copy(pos);
       this.threat = Math.min(1, this.threat + threat);
-      if (event.type === 'interaction_complete' || event.type === 'interaction_start') {
+      if (event.type === 'interaction_complete' || event.type === 'interaction_start' || event.type === 'pickup_complete') {
         this.state = 'investigating';
         this.stateTimer = 5 + threat * 12;
+      }
+      if (event.type === 'object_drop') {
+        this.state = 'closing';
+        this.stateTimer = 4 + threat * 8;
+        this.manipulations.push({ type: 'pulse_light' });
       }
     });
   }
 
-  chooseState({ noiseLevel, noiseCategory, fearRatio, phase, isolation, zonePressure }) {
+  chooseState({ noiseLevel, noiseCategory, fearRatio, phase, isolation, zonePressure, zoneContext }) {
     if (this.threat > 0.86 || fearRatio > 0.9) {
       this.state = 'closing';
       this.stateTimer = 5;
+    } else if (zoneContext?.lightingState === 'blackout' && phase >= 3 && Math.random() < 0.4) {
+      this.state = 'closing';
+      this.stateTimer = 4 + Math.random() * 3;
     } else if (isolation > 0.55 && phase >= 3) {
       this.state = 'isolating';
       this.stateTimer = 6 + Math.random() * 4;

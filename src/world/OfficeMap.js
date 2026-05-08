@@ -158,6 +158,21 @@ export class OfficeMap {
       this.addBox(-33 + (i % 7) * 2.6, 0.35 + Math.floor(i / 7) * 0.42, -8 + (i % 3) * 0.9, 1.1, 0.45, 0.8, this.materials.paper, true);
     }
     this.createInteractable({
+      id: 'archive_keycard',
+      kind: 'keycard',
+      label: 'keycard',
+      zoneId: 'archive',
+      position: new THREE.Vector3(-31.5, 1.02, 6.8),
+      size: [0.22, 0.02, 0.33],
+      material: this.materials.screen,
+      pickupable: true,
+      weight: 0.15,
+      holdTime: 0.72,
+      soundRadius: 5,
+      threat: 0.05,
+      soundType: 'paper'
+    });
+    this.createInteractable({
       id: 'archive_file_box',
       kind: 'file_box',
       label: 'recover employee file',
@@ -179,6 +194,21 @@ export class OfficeMap {
       this.addServerRack(x, -27.2);
     }
     [-32, -25, -18].forEach(x => this.addEmergencyStrip(x, -33.6, 2.7));
+    this.createInteractable({
+      id: 'server_drive',
+      kind: 'server_drive',
+      label: 'server drive',
+      zoneId: 'server',
+      position: new THREE.Vector3(-18.2, 0.95, -15.7),
+      size: [0.8, 0.2, 0.4],
+      material: this.materials.metal,
+      pickupable: true,
+      weight: 1.35,
+      holdTime: 1.1,
+      soundRadius: 9,
+      threat: 0.3,
+      soundType: 'server'
+    });
     this.createInteractable({
       id: 'server_node_alpha',
       kind: 'server_terminal',
@@ -205,6 +235,21 @@ export class OfficeMap {
       this.addPersonalTrace(x + 0.25, z + 0.52);
     });
     this.addBox(33.2, 1.6, 0.2, 0.12, 2.9, 12.5, this.materials.glass, false);
+    this.createInteractable({
+      id: 'executive_badge',
+      kind: 'badge',
+      label: 'employee badge',
+      zoneId: 'executive',
+      position: new THREE.Vector3(18.4, 1.02, 6.5),
+      size: [0.18, 0.02, 0.28],
+      material: this.materials.screen,
+      pickupable: true,
+      weight: 0.14,
+      holdTime: 0.65,
+      soundRadius: 5,
+      threat: 0.06,
+      soundType: 'paper'
+    });
     this.createInteractable({
       id: 'executive_voice_log',
       kind: 'voice_log',
@@ -255,6 +300,21 @@ export class OfficeMap {
     this.addBox(-34.2, 1, 23.5, 1.2, 2, 0.7, this.materials.screen, true);
     this.addBox(-34.2, 1, 20.6, 1.2, 2, 0.7, this.materials.metal, true);
     this.addCounter(-24, 27.1);
+    this.createInteractable({
+      id: 'cafeteria_coffee_mug',
+      kind: 'mug',
+      label: 'coffee mug',
+      zoneId: 'cafeteria',
+      position: new THREE.Vector3(-26.5, 1.05, 26.2),
+      size: [0.24, 0.22, 0.24],
+      material: this.materials.paper,
+      pickupable: true,
+      weight: 0.42,
+      holdTime: 0.7,
+      soundRadius: 5,
+      threat: 0.08,
+      soundType: 'ceramic'
+    });
     this.createInteractable({
       id: 'cafeteria_motion_sensor',
       kind: 'motion_sensor',
@@ -324,6 +384,21 @@ export class OfficeMap {
     this.addBox(3.2, 1.6, 27.8, 1.5, 3.2, 0.1, this.materials.metal, true);
     this.addBox(0, 0.05, 19.5, 9, 0.04, 4.5, this.materials.concrete, false);
     this.addDirectoryBoard(-6.4, 21.3);
+    this.createInteractable({
+      id: 'lobby_flashlight',
+      kind: 'flashlight',
+      label: 'flashlight',
+      zoneId: 'lobby',
+      position: new THREE.Vector3(-1.6, 1.05, 25.6),
+      size: [0.18, 0.12, 0.5],
+      material: this.materials.metal,
+      pickupable: true,
+      weight: 0.78,
+      holdTime: 0.95,
+      soundRadius: 6,
+      threat: 0.09,
+      soundType: 'metal'
+    });
     this.createInteractable({
       id: 'elevator_panel',
       kind: 'elevator_panel',
@@ -506,13 +581,14 @@ export class OfficeMap {
     return Math.abs(Math.sin(x * 12.9898 + z * 78.233) * 43758.5453) % 1;
   }
 
-  createInteractable({ id, kind, label, zoneId, position, size, material, holdTime, soundRadius, threat, soundType }) {
+  createInteractable({ id, kind, label, zoneId, position, size, material, holdTime, soundRadius, threat, soundType, pickupable = false, weight = 0.8 }) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
     mesh.position.copy(position);
     mesh.castShadow = true;
     mesh.userData.interactableId = id;
+    mesh.userData.interactableKind = kind;
     this.scene.add(mesh);
-    this.interactables.push({ id, kind, label, zoneId, mesh, holdTime, soundRadius, threat, soundType });
+    this.interactables.push({ id, kind, label, zoneId, mesh, holdTime, soundRadius, threat, soundType, pickupable, weight });
     return mesh;
   }
 

@@ -57,6 +57,8 @@ export class AudioEngine {
       steps: 90,
       keyboard: 520,
       metal: 180,
+      ceramic: 320,
+      phone: 420,
       voice_fragment: 260,
       server: 70,
       breaker: 130,
@@ -64,7 +66,7 @@ export class AudioEngine {
       static: 220
     }[type] || 220;
     oscillator.frequency.setValueAtTime(frequency + Math.random() * frequency * 0.35, now);
-    oscillator.type = type === 'voice_fragment' ? 'triangle' : type === 'steps' ? 'sine' : 'sawtooth';
+    oscillator.type = type === 'voice_fragment' ? 'triangle' : type === 'steps' ? 'sine' : type === 'ceramic' ? 'triangle' : type === 'phone' ? 'sine' : 'sawtooth';
 
     gainNode.gain.setValueAtTime(intensity, now);
     gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);

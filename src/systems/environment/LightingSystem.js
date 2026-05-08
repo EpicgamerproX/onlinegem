@@ -10,12 +10,12 @@ export class LightingSystem {
     this.zoneStates = new Map();
     this.flickerTime = 0;
     this.blackoutTimer = lightingConfig.blackoutInterval;
+    this.eventTimer = 0;
   }
 
   init(scene, zones = []) {
     this.scene = scene;
 
-    // Dim, cool ambient fill keeps silhouettes readable without flattening the room.
     this.ambientLight = new THREE.AmbientLight(0x9aa7a0, 0.18);
     this.scene.add(this.ambientLight);
 
@@ -62,17 +62,24 @@ export class LightingSystem {
     this.scene.add(fixture);
 
     this.zoneLights.set(zone.id, { light, fixture, seed: 3.17 + index * 1.91, pulse: 0 });
-    this.zoneStates.set(zone.id, { state: 'normal', timer: 0 });
+    this.zoneStates.set(zone.id, { state: 'normal', timer: 0, nextState: null });
   }
 
   update(deltaTime, context = {}) {
     this.flickerTime += deltaTime;
     this.blackoutTimer -= deltaTime;
+    this.eventTimer -= deltaTime;
 
     if (this.blackoutTimer <= 0) {
       this.blackoutTimer = lightingConfig.blackoutInterval + Math.random() * 24;
       const phase = context.missionState?.phase || 1;
-      if (phase > 1) this.randomFailure(phase >= 4 ? 'blackout' : 'unstable');
+      const failureType = phase >= 4 ? 'blackout' : 'unstable';
+      this.randomFailure(failureType);
+    }
+
+    if (this.eventTimer <= 0 && Math.random() < 0.14) {
+      this.triggerRandomTrailShutdown();
+      this.eventTimer = lightingConfig.failureInterval;
     }
 
     this.zoneLights.forEach((entry, zoneId) => {
@@ -92,6 +99,9 @@ export class LightingSystem {
       entry.light.intensity = Math.max(0.02, settings.intensity * 0.58 + flicker + buzz + entry.pulse);
       entry.fixture.material.emissiveIntensity = Math.max(0.02, settings.emissive + flicker * 0.8 + entry.pulse);
     });
+
+    this.directionalLight.intensity = 0.18 * (1 - Math.max(...Array.from(this.zoneStates.values()).map(item => item.state === 'blackout' ? 0.35 : item.state === 'red_lockdown' ? 0.2 : 0)));
+    this.ambientLight.intensity = 0.18 * (1 - Math.max(...Array.from(this.zoneStates.values()).map(item => item.state === 'blackout' ? 0.45 : item.state === 'red_lockdown' ? 0.25 : 0)));
   }
 
   setZoneState(zoneId, state, options = {}) {
@@ -103,8 +113,8 @@ export class LightingSystem {
   }
 
   recoverZone(zoneId) {
-    this.setZoneState(zoneId, 'recovering', {
-      duration: lightingConfig.recoveryDelay,
+    this.setZoneState(zoneId, 'startup', {
+      duration: lightingConfig.startupDelay,
       nextState: 'normal'
     });
   }
@@ -117,11 +127,38 @@ export class LightingSystem {
   randomFailure(state = 'unstable') {
     const ids = Array.from(this.zoneLights.keys());
     const zoneId = ids[Math.floor(Math.random() * ids.length)];
-    this.setZoneState(zoneId, state, {
-      duration: state === 'blackout' ? 14 : 18,
-      nextState: state === 'blackout' ? 'emergency' : 'normal'
-    });
+    const duration = state === 'blackout' ? 14 : state === 'red_lockdown' ? 18 : 18;
+    const next = state === 'blackout' ? 'emergency' : 'normal';
+    this.setZoneState(zoneId, state, { duration, nextState: next });
+    if (Math.random() < 0.28 && state !== 'blackout') {
+      this.triggerMonitorFlash(zoneId);
+    }
     return zoneId;
+  }
+
+  triggerRandomTrailShutdown() {
+    const ids = Array.from(this.zoneLights.keys());
+    if (!ids.length) return;
+    const pair = ids.sort(() => Math.random() - 0.5).slice(0, 2);
+    pair.forEach((zoneId, index) => {
+      this.setZoneState(zoneId, 'blackout', {
+        duration: 7 + index * 2,
+        nextState: 'red_lockdown'
+      });
+    });
+  }
+
+  triggerMonitorFlash(zoneId) {
+    const entry = this.zoneLights.get(zoneId);
+    if (!entry) return;
+    entry.pulse = Math.max(entry.pulse, 0.8);
+  }
+
+  triggerRedLockdown(zoneId, duration = 16) {
+    this.setZoneState(zoneId, 'red_lockdown', {
+      duration,
+      nextState: 'emergency'
+    });
   }
 
   getZoneState(zoneId) {
