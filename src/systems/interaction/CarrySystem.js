@@ -82,7 +82,7 @@ export class CarrySystem {
       threat: Math.min(0.68, this.heldItem.threat * 1.4 + 0.06),
       radius: 7 + this.heldItem.weight * 4,
       duration: 0.7 + this.heldItem.weight * 0.7
-n    };
+    };
     this.heldItem = null;
     this.inspectMode = false;
     return dropped;
