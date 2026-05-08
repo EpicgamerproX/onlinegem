@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { entityConfig } from '../../config/entityConfig.js';
+import { EntityBehavior } from './EntityBehavior.js';
 
 export class EntityController {
   constructor() {
@@ -10,6 +11,9 @@ export class EntityController {
     this.approachSpeed = entityConfig.baseApproachSpeed;
     this.playerPosition = new THREE.Vector3();
     this.hasReachedPlayer = false;
+    this.behavior = new EntityBehavior();
+    this.currentState = 'dormant_pressure';
+    this.lastManipulations = [];
   }
 
   init(scene) {
@@ -54,26 +58,29 @@ export class EntityController {
     return group;
   }
 
-  update(noiseLevel, deltaTime, camera) {
+  update(noiseLevel, deltaTime, camera, context = {}) {
     if (camera) {
       this.playerPosition.copy(camera.position);
     }
 
-    let speedMultiplier = entityConfig.noiseSpeedMultiplier.low;
-    if (noiseLevel > 0.3) speedMultiplier = entityConfig.noiseSpeedMultiplier.veryLoud;
-    else if (noiseLevel > 0.15) speedMultiplier = entityConfig.noiseSpeedMultiplier.loud;
-    else if (noiseLevel < 0.05) speedMultiplier = entityConfig.noiseSpeedMultiplier.silent;
+    const behaviorResult = this.behavior.update({
+      ...context,
+      noiseLevel,
+      deltaTime,
+      playerPosition: this.playerPosition
+    });
+    this.currentState = behaviorResult.state;
+    this.lastManipulations = behaviorResult.manipulations || [];
 
-    // Approach player
-    const direction = new THREE.Vector3().subVectors(this.playerPosition, this.entity.position).normalize();
+    const direction = new THREE.Vector3().subVectors(behaviorResult.targetPosition, this.entity.position).normalize();
     if (Number.isFinite(direction.x)) {
-      this.entity.position.addScaledVector(direction, this.approachSpeed * speedMultiplier * deltaTime);
+      this.entity.position.addScaledVector(direction, this.approachSpeed * behaviorResult.speedMultiplier * deltaTime);
     }
 
     // Update distance
     this.distance = this.entity.position.distanceTo(this.playerPosition);
     this.entity.lookAt(this.playerPosition.x, this.entity.position.y, this.playerPosition.z);
-    this.updateVisibility();
+    this.updateVisibility(behaviorResult.visibilityBias);
 
     // Clamp minimum distance
     if (this.distance < this.minDistance) {
@@ -82,10 +89,14 @@ export class EntityController {
     }
   }
 
-  updateVisibility() {
-    const shouldShow = this.distance < 8;
+  updateVisibility(visibilityBias = 0.1) {
+    const shouldShow = this.distance < 4 + visibilityBias * 9 || (this.currentState === 'observing' && this.distance < 12);
     this.entity.traverse(child => {
       child.visible = shouldShow;
+      if (child.material?.opacity !== undefined) {
+        child.material.transparent = true;
+        child.material.opacity = THREE.MathUtils.clamp(visibilityBias + (8 - this.distance) * 0.08, 0.18, 0.82);
+      }
     });
 
     const scale = THREE.MathUtils.clamp(1.35 - this.distance * 0.035, 0.82, 1.2);
@@ -102,5 +113,20 @@ export class EntityController {
 
   shouldTriggerJumpScare() {
     return this.hasReachedPlayer || this.distance <= this.minDistance + 0.45;
+  }
+
+  drainManipulations() {
+    const drained = this.lastManipulations;
+    this.lastManipulations = [];
+    return drained;
+  }
+
+  getState() {
+    return {
+      state: this.currentState,
+      threat: this.behavior.threat,
+      position: this.getEntityPosition(),
+      distance: this.distance
+    };
   }
 }

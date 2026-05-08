@@ -22,6 +22,10 @@ export class PlayerSync {
 
     player.target.position.set(payload.x, 0.9, payload.z);
     player.target.yaw = payload.yaw || 0;
+    player.zoneId = payload.zone_id || 'unknown';
+    player.noiseCategory = payload.noise_category || 'silent';
+    player.fearBand = payload.fear_band || 'low';
+    player.distress = payload.distress || 0;
     player.lastSeen = performance.now();
   }
 
@@ -52,6 +56,7 @@ export class PlayerSync {
       if (performance.now() - player.lastSeen > 12000) {
         this.removePlayer(userId);
       }
+      player.label.visible = !(player.fearBand === 'high' && Math.sin(performance.now() * 0.012) > 0.45);
     });
   }
 
@@ -86,12 +91,29 @@ export class PlayerSync {
 
     return {
       group,
+      label,
       target: {
         position: new THREE.Vector3(payload.x, 0.9, payload.z),
         yaw: payload.yaw || 0
       },
+      zoneId: payload.zone_id || 'unknown',
+      noiseCategory: payload.noise_category || 'silent',
+      fearBand: payload.fear_band || 'low',
+      distress: payload.distress || 0,
       lastSeen: performance.now()
     };
+  }
+
+  getRemoteSnapshots() {
+    return Array.from(this.players.entries()).map(([userId, player]) => ({
+      userId,
+      x: player.group.position.x,
+      z: player.group.position.z,
+      zoneId: player.zoneId,
+      noiseCategory: player.noiseCategory,
+      fearBand: player.fearBand,
+      distress: player.distress
+    }));
   }
 
   createNameLabel(name) {

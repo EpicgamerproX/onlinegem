@@ -127,8 +127,50 @@
       color: #ffb8a6;
       font-size: 13px;
     }
+    #mission-hud {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: min(360px, calc(100vw - 24px));
+      padding: 12px 14px;
+      background: rgba(3, 7, 7, 0.68);
+      border: 1px solid rgba(216, 255, 244, 0.16);
+      border-radius: 6px;
+      color: #d8fff4;
+      font-size: 13px;
+      line-height: 1.45;
+      pointer-events: none;
+    }
+    .mission-phase {
+      color: #74ffd8;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    .mission-secondary {
+      color: #b8c8c1;
+      margin-top: 4px;
+    }
+    #interaction-prompt {
+      position: absolute;
+      left: 50%;
+      bottom: 16%;
+      transform: translateX(-50%);
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(3, 7, 7, 0.72);
+      border: 1px solid rgba(216, 255, 244, 0.18);
+      color: #d8fff4;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 120ms ease;
+    }
+    #interaction-prompt.is-visible {
+      opacity: 1;
+    }
   </style>
-  <script type="module" crossorigin src="/assets/index-BGRVi02Y.js"></script>
+  <script type="module" crossorigin src="/assets/index-BPOFSG9b.js"></script>
 </head>
 <body>
   <div id="game-container"></div>

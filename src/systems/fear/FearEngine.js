@@ -17,7 +17,7 @@ export class FearEngine {
     this.fearEffects.init(scene, camera);
   }
 
-  update(noiseLevel, entityDistance, deltaTime) {
+  update(noiseLevel, entityDistance, deltaTime, context = {}) {
     // Calculate fear level based on inputs
     let fearIncrease = 0;
 
@@ -28,11 +28,21 @@ export class FearEngine {
     const proximityFactor = Math.max(0, 1 - (entityDistance / 20));
     fearIncrease += proximityFactor * 30;
 
-    // Time pressure
-    fearIncrease += deltaTime * 5;
+    // Time pressure keeps collapse inevitable even when players stay quiet.
+    fearIncrease += 3.2;
+
+    const zoneContext = context.zoneContext || {};
+    fearIncrease *= zoneContext.darknessMultiplier || 1;
+    fearIncrease += (zoneContext.pressure || 1) * 2.2;
+    fearIncrease += (zoneContext.isolationScore || 0) * 8;
+    if (context.isInteracting) fearIncrease += 10;
+    if (context.entityState?.state === 'observing') fearIncrease += 8;
+    if (context.entityState?.state === 'isolating') fearIncrease += 11;
 
     this.fearLevel += fearIncrease * deltaTime;
+    if (context.relief) this.fearLevel -= context.relief * this.maxFearLevel;
     this.fearLevel = Math.min(this.maxFearLevel, this.fearLevel);
+    this.fearLevel = Math.max(0, this.fearLevel);
 
     // Apply effects
     const fearRatio = this.fearLevel / this.maxFearLevel;

@@ -2,6 +2,7 @@ export class AudioEngine {
   constructor() {
     this.audioContext = null;
     this.ambientSounds = [];
+    this.fakeSoundTimer = null;
   }
 
   init() {
@@ -32,7 +33,7 @@ export class AudioEngine {
 
   scheduleFakeSounds() {
     // Schedule random fake sounds
-    setInterval(() => {
+    this.fakeSoundTimer = setInterval(() => {
       if (Math.random() < 0.3) { // 30% chance
         this.playFakeSound();
       }
@@ -40,19 +41,35 @@ export class AudioEngine {
   }
 
   playFakeSound() {
+    this.playTransient({ type: 'static', intensity: 0.1, duration: 2 });
+  }
+
+  playTransient({ type = 'static', intensity = 0.1, duration = 1 } = {}) {
+    if (!this.audioContext) return;
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
 
     oscillator.connect(gainNode);
     gainNode.connect(this.audioContext.destination);
 
-    oscillator.frequency.setValueAtTime(200 + Math.random() * 800, this.audioContext.currentTime);
-    oscillator.type = 'sawtooth';
+    const now = this.audioContext.currentTime;
+    const frequency = {
+      steps: 90,
+      keyboard: 520,
+      metal: 180,
+      voice_fragment: 260,
+      server: 70,
+      breaker: 130,
+      speaker: 330,
+      static: 220
+    }[type] || 220;
+    oscillator.frequency.setValueAtTime(frequency + Math.random() * frequency * 0.35, now);
+    oscillator.type = type === 'voice_fragment' ? 'triangle' : type === 'steps' ? 'sine' : 'sawtooth';
 
-    gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 2);
+    gainNode.gain.setValueAtTime(intensity, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration);
 
     oscillator.start();
-    oscillator.stop(this.audioContext.currentTime + 2);
+    oscillator.stop(now + duration);
   }
 }

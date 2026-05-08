@@ -39,7 +39,7 @@ export class NetworkManager {
     });
   }
 
-  update(cameraController, deltaTime) {
+  update(cameraController, deltaTime, state = {}) {
     if (!this.channel) return;
 
     this.playerSync.update(deltaTime);
@@ -47,7 +47,7 @@ export class NetworkManager {
     if (now - this.lastBroadcast < 120) return;
     this.lastBroadcast = now;
 
-    const payload = this.createPayload(cameraController);
+    const payload = this.createPayload(cameraController, state);
     this.lastPayload = payload;
     this.channel.send({
       type: 'broadcast',
@@ -60,7 +60,7 @@ export class NetworkManager {
     }
   }
 
-  createPayload(cameraController = null) {
+  createPayload(cameraController = null, state = {}) {
     const pose = cameraController?.getPose?.();
     return {
       user_id: this.user.id,
@@ -71,8 +71,17 @@ export class NetworkManager {
       y: pose?.position.y ?? 1.6,
       z: pose?.position.z ?? 2,
       yaw: pose?.yaw ?? 0,
-      pitch: pose?.pitch ?? 0
+      pitch: pose?.pitch ?? 0,
+      zone_id: state.zoneId || 'unknown',
+      noise_category: state.noiseCategory || 'silent',
+      fear_band: state.fearBand || 'low',
+      objective_interaction_id: state.objectiveInteractionId || null,
+      distress: state.distress || 0
     };
+  }
+
+  getRemotePlayers() {
+    return this.playerSync.getRemoteSnapshots();
   }
 
   async trackPresence(payload) {
