@@ -15,6 +15,7 @@ export class AuthManager {
     if (!isSupabaseConfigured) {
       this.setStatus('Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to start online play.');
       this.overlay.classList.add('is-visible');
+      this.setFormDisabled(true);
       throw new Error('Supabase is not configured');
     }
 
@@ -78,6 +79,13 @@ export class AuthManager {
   async handleSubmit(event) {
     event.preventDefault();
     const form = event.currentTarget;
+
+    if (!isSupabaseConfigured || !supabase) {
+      this.setStatus('Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to start online play.');
+      this.setFormDisabled(true);
+      return;
+    }
+
     const formData = new FormData(form);
     if (this.profileOnlyUser) {
       await this.handleProfileOnlySubmit(form, formData);
@@ -186,7 +194,14 @@ export class AuthManager {
     if (this.statusEl) this.statusEl.textContent = message;
   }
 
+  setFormDisabled(disabled) {
+    this.overlay?.querySelectorAll('input, button').forEach(control => {
+      control.disabled = disabled;
+    });
+  }
+
   cleanError(message) {
+    if (!message) return 'Something went wrong. Please try again.';
     if (message.includes('duplicate') || message.includes('unique')) {
       return 'That username is already taken.';
     }
